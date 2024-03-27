@@ -15,7 +15,7 @@ export const createToken = (user) => {
 
 export const httpAuthMiddleware = async (req, res, next) => {
   try {
-    const cookie = req.cookies.ct_session;
+    const cookie = req.cookies.bracket_session;
     if (req.originalUrl !== "/api/users/login" && cookie) {
       const foundUser = await User.findById(cookie);
       req.user = {

@@ -1,21 +1,28 @@
+import { createToken } from "../middlewares/authMiddleware.js";
 import User from "../models/User.js";
-
+import bcrypt from "bcrypt";
 
 
 export const createUser = async (req, res) => {
   try {
     const { user } = req.body;
-    const createdUser = new User({
-      ...user,
-    });
 
 
+    const saltRounds = 10;
+    
 
-    const savedUser = await createdUser.save();
+ const pwHash = await bcrypt.hash(user.password, saltRounds);
 
-
-    // res.cookie("bracket_session", savedUser.id);
-    res.status(201).send(savedUser);
+ const createdUser = new User({
+  ...user,
+  is_new: true,
+  password: pwHash,
+});
+ const savedUser = await createdUser.save();
+    
+    const jwt = createToken(savedUser);
+    res.cookie( 'bracket_session', jwt,{ maxAge: 1000 * 60 * 10, httpOnly: false });
+    res.status(201).send({ user: savedUser, token: jwt});
   } catch (error) {
     console.log(error)
     res.status(500).send({
